@@ -1,7 +1,7 @@
 var socket = io.connect('http://localhost:8080');
 // submit text message without reload/refresh the page
 const chatElements = {
-	form: document.querySelector('form'),
+	form: document.querySelector('#chatForm'),
 	text: document.querySelector('#txt'),
 	messages: document.querySelector('#messages')
 }

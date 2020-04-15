@@ -4,12 +4,17 @@ const http = require('http').Server(app);
 const io = require('socket.io')(http);
 const uuid = require('uuid/v4');
 
+app.set('views', './views')
+app.set('view engine', 'ejs')
+app.use(express.static('public'))
+app.use(express.urlencoded({ extended: true }))
+
 uuid(); // ⇨ '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
 
 const rooms = { };
 
 app.get('/', function(request, response) {
-	response.render('index.ejs', { rooms: rooms });
+	response.render('index', { rooms: rooms });
 });
 
 app.post('/room', function(request, response) {
@@ -26,12 +31,12 @@ app.get('/:room', function(request, response) {
 	if (rooms[request.params.room] == null) {
 		return response.redirect('/');
 	}
-	response.render('room.ejs', {roomName: request.params.room});
+	response.render('room', {roomName: request.params.room});
 });
 
-app.get('/meeting-setup', function(request, response) {
-	response.render('meeting-setup.ejs');
-});
+// app.get('/meeting-setup', function(request, response) {
+// 	response.render('meeting-setup.ejs');
+// });
 
 io.sockets.on('connection', function(socket) {
 	// write all the realtime communication functions here
@@ -46,6 +51,7 @@ io.sockets.on('connection', function(socket) {
 
 	socket.on('disconnect', function(username) {
 		getUserRooms(socket).forEach(room => {
+			socket.to(room).broadcast.emit('is_online', '🔴 <i>' + rooms[room].users[socket.username] + ' left the chat..</i>');
 			io.emit('is_online', '🔴 <i>' + rooms[room].users[socket.username] + ' left the chat..</i>');
 			delete rooms[room].users[socket.username];
 		});

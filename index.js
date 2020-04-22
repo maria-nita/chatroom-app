@@ -43,23 +43,21 @@ io.sockets.on('connection', function(socket) {
 
 	socket.on('username', function(room, username) {
 		socket.join(room);
-		rooms[room].users[socket.username] = username;
+		rooms[room].users[socket.id] = username;
 		// socket.username = username;
-		socket.to(room).broadcast.emit('is_online', '🔵 <i>' + rooms[room].users[socket.username] + ' join the chat..</i>');
+		socket.to(room).broadcast.emit('is_online', '🔵 <i>' + username + ' join the chat..</i>');
 		// io.emit('is_online', '🔵 <i>' + socket.username + ' join the chat..</i>');
 	});
 
-	socket.on('disconnect', function(username) {
+	socket.on('disconnect', function() {
 		getUserRooms(socket).forEach(room => {
-			socket.to(room).broadcast.emit('is_online', '🔴 <i>' + rooms[room].users[socket.username] + ' left the chat..</i>');
-			io.emit('is_online', '🔴 <i>' + rooms[room].users[socket.username] + ' left the chat..</i>');
-			delete rooms[room].users[socket.username];
+			socket.to(room).broadcast.emit('is_offline', '🔴 <i>' + rooms[room].users[socket.id] + ' left the chat..</i>');
+			delete rooms[room].users[socket.id];
 		});
 	})
 
 	socket.on('chat_message', function(room, message) {
-		socket.to(room).broadcast.emit('chat_message', '<strong>' + rooms[room].users[socket.username] + '</strong>: ' + message);
-		// io.emit('chat_message', '<strong>' + socket.username + '</strong>: ' + message);
+		socket.to(room).broadcast.emit('chat_message', '<strong>' + rooms[room].users[socket.id] + '</strong>: ' + message);
 	});
 });
 
@@ -70,7 +68,7 @@ const server = http.listen(8080, function() {
 
 function getUserRooms(socket) {
 	return Object.entries(rooms).reduce((names, [name, room]) => {
-		if (room.users[socket.username] != null) names.push(name)
+		if (room.users[socket.id] != null) names.push(name)
 		return names
 	}, [])
   }

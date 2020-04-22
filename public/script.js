@@ -17,9 +17,9 @@ if (chatElements.form != null) {
 	
 	chatElements.form.addEventListener('submit', function(e) {
 		e.preventDefault();
-		socket.emit('chat_message', roomName, chatElements.text.value);
+		socket.emit('send_chat_message', roomName, chatElements.text.value);
 		chatElements.text.value;
-		return false;
+		// return false;
 	});
 }
 
@@ -41,7 +41,12 @@ socket.on('chat_message', function(msg) {
 
 // append text if someone is online
 socket.on('is_online', function(username) {
-	const newUser = `<li>${username}</li>`;
-	chatElements.messages.insertAdjacentHTML('beforeend', newUser);
+	const userUpdate = `<li>${username}</li>`;
+	chatElements.messages.insertAdjacentHTML('beforeend', userUpdate);
 });
 
+// append text if someone goes offline
+socket.on('is_offline', function(username) {
+	const userUpdate = `<li>${username}</li>`;
+	chatElements.messages.insertAdjacentHTML('beforeend', userUpdate);
+});
